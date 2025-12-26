@@ -1,15 +1,16 @@
 # -- Bale Bot API Credentials --
-# !!! این توکن را از BotFather در «بله» دریافت کرده و جایگزین کنید !!!
-BOT_TOKEN = "YOUR_SUPER_SECRET_BALE_BOT_TOKEN"
-
-# -- Bale API Server --
+BOT_TOKEN = "165186636:gqAVBHJY5WiZi1kTdycGOK1Y8k5hb8mxNqM"
 BALE_API_BASE_URL = "https://tapi.bale.ai/"
 
-# -- Database --
-DB_NAME = "etekaaf_registry.db"
+# === Database Credentials (MySQL/MariaDB) ===
+# !!! این بخش را با اطلاعات دیتابیس هاست خود پر کنید !!!
+DB_HOST = "your_database_host"  # مثلا: "localhost" یا IP سرور
+DB_USER = "fatehsem_etekaaf_db"
+DB_PASSWORD = "dhcivh27701"
+DB_NAME = "fatehsem_etekaaf_db"  # نام دیتابیسی که ساخته‌اید
 
 # -- Soft Lock --
-LOCK_DURATION_SECONDS = 60  # مدت زمان قفل نرم روی یک کد ملی
+LOCK_DURATION_SECONDS = 60
 
 # === Static Content (اطلاعات ثابت برنامه) ===
 
@@ -52,5 +53,5 @@ EMERGENCY_CHECKIN_SUCCESS = "🆘 پذیرش اضطراری با موفقیت ث
 
 # -- نقش‌ها (Roles) --
 # آیدی عددی اکانت‌های «بله» ادمین و اپراتور را اینجا وارد کنید
-ADMIN_USER_IDS = [123456789]  # مثال
-OPERATOR_USER_IDS = [987654321, 123123123] # مثال
+ADMIN_USER_IDS = [1645838619]  # مثال
+OPERATOR_USER_IDS = [1338501520, 123123123] # مثال

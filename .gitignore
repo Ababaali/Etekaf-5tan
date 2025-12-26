@@ -1,0 +1,29 @@
+# Python virtual environments
+venv/
+env/
+*.env
+
+# Sensitive config 
+config.py
+*.db
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
