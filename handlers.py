@@ -133,7 +133,7 @@ async def handle_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
 async def process_national_id(update: Update, context: ContextTypes.DEFAULT_TYPE, national_id: str):
     user_id = update.effective_user.id
     
-    # --- اصلاح حیاتی: تشخیص منبع پیام (دکمه یا متن) ---
+    # --- اصلاح حیاتی: تشخیص منبع پیام (دکمه یا مت
     if update.callback_query:
         # اگر از کلیک روی دکمه آمده باشد
         message_interface = update.callback_query.message
