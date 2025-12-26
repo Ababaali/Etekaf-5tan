@@ -204,20 +204,54 @@ def get_live_stats() -> Dict[str, int]:
 # فرض بر این است که برنامه نویس شما میتواند این جایگزینی ساده را انجام دهد.
 # اما برای تابع import:
 def import_participants_from_dataframe(df: pd.DataFrame):
+    """وارد کردن داده‌ها با مدیریت خطای سلول‌های خالی"""
     conn = get_connection()
     cursor = conn.cursor()
-    insert_query = """
-        INSERT INTO participants (national_id, full_name, father_name, payment_status)
-        VALUES (%s, %s, %s, %s)
-        ON DUPLICATE KEY UPDATE
-            full_name = VALUES(full_name),
-            father_name = VALUES(father_name),
-            payment_status = VALUES(payment_status)
-    """
-    data_tuples = [tuple(row) for row in df.to_numpy()]
-    cursor.executemany(insert_query, data_tuples)
-    conn.commit()
-    cursor.close(); conn.close()
+    
+    try:
+        # 1. تبدیل نام ستون‌ها به حروف کوچک و حذف فاصله (برای اطمینان)
+        df.columns = [c.lower().strip() for c in df.columns]
+        
+        # 2. پر کردن سلول‌های خالی (NaN) با مقدار خالی رشته‌ای
+        # این خط حیاتی است: MySQL مقدار NaN را قبول نمی‌کند
+        df = df.fillna("")
+        
+        # 3. اطمینان از اینکه همه چیز رشته است
+        df['national_id'] = df['national_id'].astype(str)
+        df['full_name'] = df['full_name'].astype(str)
+        df['father_name'] = df['father_name'].astype(str)
+        df['payment_status'] = df['payment_status'].astype(str)
+
+        insert_query = """
+            INSERT INTO participants (national_id, full_name, father_name, payment_status)
+            VALUES (%s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+                full_name = VALUES(full_name),
+                father_name = VALUES(father_name),
+                payment_status = VALUES(payment_status)
+        """
+        
+        # تبدیل به لیست تاپل
+        data_tuples = []
+        for _, row in df.iterrows():
+            data_tuples.append((
+                row['national_id'], 
+                row['full_name'], 
+                row['father_name'], 
+                row['payment_status']
+            ))
+        
+        cursor.executemany(insert_query, data_tuples)
+        conn.commit()
+        print(f"✅ Successfully imported {len(data_tuples)} rows.")
+        
+    except Exception as e:
+        print(f"❌ Import Error: {e}")
+        raise e # خطا را برگردان تا هندلر بفهمد
+    finally:
+        cursor.close()
+        conn.close()
+
 
 def get_checked_in_data_for_excel() -> pd.DataFrame:
     conn = get_connection()
