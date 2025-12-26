@@ -4,7 +4,7 @@ BALE_API_BASE_URL = "https://tapi.bale.ai/"
 
 # === Database Credentials (MySQL/MariaDB) ===
 # !!! این بخش را با اطلاعات دیتابیس هاست خود پر کنید !!!
-DB_HOST = "your_database_host"  # مثلا: "localhost" یا IP سرور
+DB_HOST = "localhost"  # مثلا: "localhost" یا IP سرور
 DB_USER = "fatehsem_etekaaf_db"
 DB_PASSWORD = "dhcivh27701"
 DB_NAME = "fatehsem_etekaaf_db"  # نام دیتابیسی که ساخته‌اید
