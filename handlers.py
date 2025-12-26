@@ -133,11 +133,20 @@ async def handle_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
 async def process_national_id(update: Update, context: ContextTypes.DEFAULT_TYPE, national_id: str):
     user_id = update.effective_user.id
     
+    # --- اصلاح حیاتی: تشخیص منبع پیام (دکمه یا متن) ---
+    if update.callback_query:
+        # اگر از کلیک روی دکمه آمده باشد
+        message_interface = update.callback_query.message
+    else:
+        # اگر کاربر متن تایپ کرده باشد
+        message_interface = update.message
+    # ----------------------------------------------------
+
     # چک تکراری بودن
     checkin_status = db.get_checkin_status(national_id)
     if checkin_status:
         time_str = checkin_status['checked_in_at'].strftime("%H:%M")
-        await update.message.reply_text(
+        await message_interface.reply_text(
             f"{config.CHECKIN_ALREADY_DONE}\n⏰ زمان پذیرش: {time_str}\n👤 توسط: {checkin_status['checked_in_by']}",
             parse_mode='Markdown'
         )
@@ -145,7 +154,7 @@ async def process_national_id(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     # چک قفل نرم
     if not db.create_soft_lock(national_id, user_id):
-        await update.message.reply_text(config.SOFT_LOCK_ACTIVE_MESSAGE)
+        await message_interface.reply_text(config.SOFT_LOCK_ACTIVE_MESSAGE)
         return AWAITING_INPUT
     
     context.user_data['national_id'] = national_id
@@ -157,7 +166,7 @@ async def process_national_id(update: Update, context: ContextTypes.DEFAULT_TYPE
             [InlineKeyboardButton("🚨 ثبت پذیرش اضطراری", callback_data=f"emergency_{national_id}")],
             [InlineKeyboardButton("بازگشت", callback_data="cancel")]
         ]
-        await update.message.reply_text(
+        await message_interface.reply_text(
             f"{config.NATIONAL_ID_NOT_FOUND}\n\nکد ملی: `{national_id}`",
             reply_markup=InlineKeyboardMarkup(keyboard),
             parse_mode='Markdown'
@@ -183,14 +192,10 @@ async def process_national_id(update: Update, context: ContextTypes.DEFAULT_TYPE
         [InlineKeyboardButton("🔙 انصراف", callback_data="cancel")]
     ]
     
-    # اگر از دکمه کال‌بک آمده باشیم (انتخاب از لیست جستجو) باید پیام را ادیت کنیم
-    # اگر پیام متنی بوده باید ریپلای کنیم. برای سادگی همیشه ریپلای میکنیم
-    if update.callback_query:
-         await update.callback_query.message.reply_text(info_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
-    else:
-         await update.message.reply_text(info_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
+    await message_interface.reply_text(info_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='Markdown')
     
     return AWAITING_CONFIRMATION
+
 
 
 async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
