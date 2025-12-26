@@ -253,24 +253,68 @@ def import_participants_from_dataframe(df: pd.DataFrame):
         conn.close()
 
 
+# در انتهای فایل database.py این دو تابع را جایگزین کنید:
+
 def get_checked_in_data_for_excel() -> pd.DataFrame:
+    """دریافت داده‌های پذیرش‌شده (روش اصلاح شده دستی)"""
     conn = get_connection()
+    cursor = conn.cursor()
+    
     query = """
-        SELECT p.full_name, p.national_id, p.payment_status, c.checked_in_by, c.checked_in_at
-        FROM participants p JOIN checkins c ON p.national_id = c.national_id
-        WHERE c.status IN ('confirmed', 'emergency')
+        SELECT
+            p.full_name,
+            p.national_id,
+            p.payment_status,
+            c.checked_in_by,
+            c.checked_in_at
+        FROM participants p
+        JOIN checkins c ON p.national_id = c.national_id
+        WHERE c.status = 'confirmed' OR c.status = 'emergency'
     """
-    df = pd.read_sql_query(query, conn)
-    conn.close()
-    return df
+    
+    try:
+        cursor.execute(query)
+        data = cursor.fetchall()
+        # دریافت نام ستون‌ها
+        columns = [col[0] for col in cursor.description]
+        
+        # ساخت دیتافریم دستی
+        df = pd.DataFrame(data, columns=columns)
+        return df
+    except Exception as e:
+        print(f"Export Error: {e}")
+        return pd.DataFrame()
+    finally:
+        cursor.close()
+        conn.close()
 
 def get_not_checked_in_data_for_excel() -> pd.DataFrame:
+    """دریافت داده‌های پذیرش‌نشده (روش اصلاح شده دستی)"""
     conn = get_connection()
+    cursor = conn.cursor()
+    
     query = """
-        SELECT p.full_name, p.national_id, p.father_name, p.payment_status
-        FROM participants p LEFT JOIN checkins c ON p.national_id = c.national_id
+        SELECT
+            p.full_name,
+            p.national_id,
+            p.father_name,
+            p.payment_status
+        FROM participants p
+        LEFT JOIN checkins c ON p.national_id = c.national_id
         WHERE c.id IS NULL
     """
-    df = pd.read_sql_query(query, conn)
-    conn.close()
-    return df
+    
+    try:
+        cursor.execute(query)
+        data = cursor.fetchall()
+        columns = [col[0] for col in cursor.description]
+        
+        df = pd.DataFrame(data, columns=columns)
+        return df
+    except Exception as e:
+        print(f"Export Error: {e}")
+        return pd.DataFrame()
+    finally:
+        cursor.close()
+        conn.close()
+
